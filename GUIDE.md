@@ -10,7 +10,8 @@ email across, and adding another domain, including **exactly what changes in you
 - [5. Add another domain](#5-add-another-domain)
 - [6. What changes in your domain's settings](#6-what-changes-in-your-domains-settings)
 - [7. Undoing a domain switch](#7-undoing-a-domain-switch)
-- [8. Updates and getting help](#8-updates-and-getting-help)
+- [8. Sending large files](#8-sending-large-files)
+- [9. Updates and getting help](#9-updates-and-getting-help)
 
 ---
 
@@ -164,7 +165,32 @@ newly added domain can take 5–15 minutes (rarely up to 24 hours) before Cloudf
 
 ---
 
-## 8. Updates and getting help
+## 8. Sending large files
+
+When you attach a file bigger than 4 MB, the app asks whether to **send it as a download link** instead. Many email
+systems refuse large attachments, and a link always arrives. If you say yes:
+
+- **Where the file goes:** your **own** Azure storage account, the one setup created for your mail, in a **private**
+  container called `shared-files`. It does **not** go to Chuck, to Chuck's servers, or to any other service. Nobody
+  can browse that container; the only way in is the link.
+- **The link:** the email gets a download link with a built-in key that **works for one year**. Anyone who has the
+  link can download that one file during that year (so treat it like the attachment itself); it can't be used to see
+  anything else in your storage.
+- **After a year** the link stops working and the file is deleted automatically.
+- **Size:** up to 1 GB per file (50 MB for photos and videos picked from the iPhone photo library).
+- **Cost:** the file counts toward your Azure storage, about $0.02 per GB per month, so a year of a 100 MB file is
+  about 2 cents.
+
+If you choose **Attach instead**, the file is sent normally. If the whole message is still too big for email (over
+about 10 MB), DTS Mail moves the largest files into the same private container and adds download links for you,
+with the same one-year rule.
+
+To remove a file before its year is up, delete it in the [Azure portal](https://portal.azure.com): your storage
+account → **Containers** → `shared-files`. Its link stops working straight away.
+
+---
+
+## 9. Updates and getting help
 
 - **Updates happen by themselves.** Your server installs new versions within about an hour of Chuck releasing them,
   the web version always matches your server, and the desktop app updates itself.

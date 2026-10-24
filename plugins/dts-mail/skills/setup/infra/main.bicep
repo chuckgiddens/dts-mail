@@ -1,6 +1,6 @@
 // DTS Mail for one friend: everything that runs in their Azure resource group.
 //
-//   Storage (tables, mail blobs, event queues, deployment packages) · Log Analytics + Application Insights
+//   Storage (tables, mail blobs, large attachments, event queues, deployment packages) · Log Analytics + Application Insights
 //   Flex Consumption plan + Function App (.NET 8 isolated) running the release package from the public channel
 //   Static Web App (Free) for the web loader
 //
@@ -130,9 +130,24 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
 }
 
+// Large attachments: the web app uploads them straight into the private "shared-files" container with a short-lived
+// write link (PUT), so the blob service needs CORS for the web app. Downloads use read-only links and need none.
 resource blobs 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
   parent: storage
   name: 'default'
+  properties: {
+    cors: {
+      corsRules: [
+        {
+          allowedOrigins: webOrigins
+          allowedMethods: [ 'PUT', 'OPTIONS' ]
+          allowedHeaders: [ '*' ]
+          exposedHeaders: [ '*' ]
+          maxAgeInSeconds: 3600
+        }
+      ]
+    }
+  }
 }
 
 resource packages 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {

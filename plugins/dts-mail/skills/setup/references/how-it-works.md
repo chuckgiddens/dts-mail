@@ -21,7 +21,10 @@ it and doesn't run any part of it; he publishes the software.
 
 - **Function App** (`dtsmail…` in your resource group): the mail server and its API. Secrets (signing keys, the
   Cloudflare token) live in its app settings, in Azure.
-- **Storage account**: mail, attachments, settings, and the per-device queues that tell your apps about new mail
+- **Storage account**: mail, attachments, settings, and the per-device queues that tell your apps about new mail.
+  Files sent as download links live in its private `shared-files` container: the app uploads them straight there
+  with a two-hour write link, and the email carries a read-only link that works for one year, after which the file
+  is deleted automatically. None of it passes through Chuck's servers
   within seconds.
 - **Static Web App** (`…-web`): the web version at `https://mail.yourdomain.com`. It's a tiny loader page; the app
   itself is downloaded from Chuck's release site, always the version that matches your server.

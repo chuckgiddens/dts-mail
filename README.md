@@ -36,7 +36,7 @@ You pay Azure and Cloudflare directly. Chuck doesn't charge anything.
 | | Typical cost | Why |
 |---|---|---|
 | **Cloudflare Workers Paid plan** | **$5 a month** | Needed to *send* email to anyone outside your own accounts. Includes 3,000 emails a month. Receiving email is free. |
-| **Azure** | **A few dollars a month** | Your server only runs when there's email to handle, plus storage for your mail. The web version is hosted free. |
+| **Azure** | **A few dollars a month** | Your server only runs when there's email to handle, plus storage for your mail and any large files you send as links. The web version is hosted free. |
 | **AI features** (optional) | **Cents to a few dollars a month** | Junk filtering and writing help, charged only when used. Runs in your own Azure account. |
 
 Most households pay about **$5–8 a month** in total. More detail: [costs](plugins/dts-mail/skills/setup/references/costs.md).
@@ -88,7 +88,7 @@ PC, and you choose your own email password yourself, in the app.
 ## After setup
 
 **Read the [guide for what comes next](GUIDE.md)**: your first sign-in, adding family, bringing your old email across,
-adding another domain, and exactly what changes in your domain's settings when you do.
+adding another domain and exactly what changes in your domain's settings when you do, and how large files are sent.
 
 - **Signing in:** in the desktop app, the web version or the iPhone app, just enter your email address and password.
   The app finds your server by itself.
@@ -108,7 +108,8 @@ completely.
 
 Common questions:
 
-- **Is my email private?** Yes. It's stored in your own Azure account. Chuck can't see it.
+- **Is my email private?** Yes. Your mail, and any large files you send as download links, are stored in your own
+  Azure account. Nothing goes through Chuck's servers, and he can't see it.
 - **What if I stop paying?** Your server stops and your email stops arriving. Use `/dts-mail:manage` → *uninstall*
   first if you're leaving, and move your domain's email somewhere else.
 - **Do I need to keep my PC on?** No. Once setup is done, everything runs in the cloud.

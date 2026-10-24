@@ -108,6 +108,17 @@ release exists but `AUTO_UPDATE=false`).
 | `POST setup/domain` | `{domain, adminEmail?, replaceExistingMail?}` | Hosts the domain: runs the migration wizard's inspect + email switch as that admin (first admin when omitted). Zone must be active on the configured Cloudflare account (else 409 with the reason). If the domain's MX points at another mail provider and `replaceExistingMail` isn't true → 409 `{needsConfirmation:true, mailProvider, mxHosts}`. Also writes the discovery TXT (§4). Returns the migration state (`status`, `emailTestPassed`, `emailTest`, `log`). Takes up to ~3 minutes (round-trip test). |
 | `POST setup/update` | | runs the updater now; returns the update state |
 
+### 2.4a Large attachments
+
+Files the user sends as download links go to the private `shared-files` container of the server's own storage
+account (`EmailStorage`); nothing goes through Chuck's infrastructure. `GET files/uploads` → `{enabled, maxBytes,
+linkDays}`; `POST files/uploads {fileName, contentType, size}` → `{fileName, uploadUrl, uploadExpiresUtc,
+uploadHeaders, downloadUrl, expiresUtc}`. The client PUTs the file to `uploadUrl` (create/write SAS for that one blob,
+2 hours) with `uploadHeaders`; `downloadUrl` is a read-only SAS valid **365 days** that forces a download under the
+original name. The automatic links for messages over 10 MB use the same container and lifetime, and the daily
+`PurgeSharedFiles` timer deletes blobs a day after their links expire. Browsers need blob-service CORS (PUT) for the
+web origins (Bicep sets it).
+
 ### 2.4 Email Worker
 
 `cloudflare-worker/worker.js` is embedded in the API assembly. Deployed with `PUT /accounts/{id}/workers/scripts/{name}`
@@ -151,7 +162,8 @@ record → the built-in default. Shared code: `core/src/discovery.ts` → `disco
 
 `selfhost/plugins/dts-mail/skills/setup/infra/`:
 - `main.bicep`: storage account, Log Analytics + Application Insights, Flex Consumption plan (FC1) + Function App
-  (.NET 8 isolated, system identity, platform CORS, all §2.1 settings), Website Contributor role on itself,
+  (.NET 8 isolated, system identity, platform CORS, all §2.1 settings), Website Contributor role on itself, blob CORS
+  (PUT) and queue CORS for the web origins,
   `onedeploy` extension with the manifest's `api.url`, Static Web App (Free). Secrets come in as `@secure()` params.
   Outputs: `functionAppName`, `apiBaseUrl`, `staticWebAppName`, `staticWebAppHostname`, `storageAccountName`.
 - `ai.bicep` (optional, separate deployment, always in the friend's own subscription): AI Services account +

@@ -67,3 +67,12 @@ Find the symptom, try the fix, and re-run the step (every step is safe to repeat
 - `current`: nothing to do. `available`: auto-update is off. `updating`: wait a few minutes.
 - `needs-infra`: `/dts-mail:manage` → re-apply infrastructure.
 - `failed`: the same release failed to install 3 times. `/dts-mail:manage` → errors; then `-Action update` to retry.
+
+## Large files sent as links
+
+| Symptom | Cause and fix |
+|---|---|
+| The app never offers "Send as a download link" | The server is older than the feature (it updates within the hour), or the file is 4 MB or smaller. |
+| Web app: "Couldn't reach your DTS Mail storage" | The storage account's blob CORS doesn't allow the web address. Re-apply the infrastructure (`/dts-mail:manage` → re-apply), which sets it for the web app's addresses. |
+| "Your DTS Mail storage refused the upload (403)" | The two-hour upload link expired before the file finished uploading (a very slow connection). Try again. |
+| A recipient's link says the file doesn't exist | The year is up and the file was deleted, or it was removed by hand from the `shared-files` container. Send it again. |
