@@ -72,12 +72,20 @@ To turn AI off: `Deploy-Infra.ps1 -RemoveAi` (the server stops calling it), then
 
 ## Add another domain
 
+First explain what will change, exactly as setup step 9 point 0 does (the DNS changes table in
+[GUIDE.md §6](https://github.com/chuckgiddens/dts-mail/blob/main/GUIDE.md#6-what-changes-in-your-domains-settings): MX to Cloudflare with the old records saved, merged SPF,
+DKIM/`cf-bounce` added, DMARC only if missing, `_dtsmail` added, website and other records untouched; catch-all to
+DTS Mail; existing forwarding rules keep working; old messages stay with the old provider; automatic undo if the test
+fails). Afterwards, summarize what changed and mention **Settings → Domains → Undo email switch**.
+
 The domain must be active in the **same** Cloudflare account, and the token must cover it (if the token is limited to
 specific zones, edit it in Cloudflare to include the new one). Then
 `Invoke-DtsSetup.ps1 -Action domain -Domain <new domain> -AdminEmail <an admin's email>` and handle a 409
 `needsConfirmation` exactly as setup step 9 does: show `mailProvider`/`mxHosts`, explain that new mail for every
 address at that domain moves to DTS Mail, and only pass `-ReplaceExistingMail` after an explicit yes.
-Domains not yet on Cloudflare: the desktop app's **Settings → Domains → Migrate a domain** wizard moves them.
+Domains not yet on Cloudflare: the desktop app's **Settings → Domains → Migrate a domain** wizard moves them; walk
+them through it with [GUIDE.md §5](https://github.com/chuckgiddens/dts-mail/blob/main/GUIDE.md#5-add-another-domain) (the only step outside the app is changing the
+nameservers at their current provider).
 
 ## Add another administrator
 

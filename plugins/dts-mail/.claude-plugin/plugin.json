@@ -1,6 +1,6 @@
 {
   "name": "dts-mail",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Set up and manage your own DTS Mail server on your Azure subscription and Cloudflare account.",
   "author": { "name": "Charles Giddens", "email": "chuck@chuckgiddens.com" },
   "homepage": "https://www.chuckgiddens.com/email",

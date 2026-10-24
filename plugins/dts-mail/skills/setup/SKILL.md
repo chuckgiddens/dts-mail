@@ -150,6 +150,13 @@ step was skipped — say why (Deploy-Infra printed a `WARN:`), and offer `/dts-m
 
 ## Step 9 — Move the domain's email to DTS Mail
 
+0. **Before running anything**, explain in plain words what will change in the domain's DNS, using
+   the table in [GUIDE.md §6](https://github.com/chuckgiddens/dts-mail/blob/main/GUIDE.md#6-what-changes-in-your-domains-settings):
+   MX moves to Cloudflare (old MX and SPF saved first), one merged SPF record, DKIM and `cf-bounce` records added,
+   DMARC added only if missing (monitor-only), `_dtsmail` and (first domain) `mail.` added; **website and all other
+   records untouched**. Also: a catch-all rule sends every address to DTS Mail, existing Cloudflare forwarding rules
+   for specific addresses keep forwarding, old messages stay with the old provider (they can import them later),
+   and a failed test puts everything back automatically. Keep it short; offer the guide link for the details.
 1. `Invoke-DtsSetup.ps1 -Action domain -Domain <domain> -AdminEmail <their email>`.
 2. If it answers 409 with `body.needsConfirmation: true`: the domain currently receives mail at
    `body.mailProvider` (`body.mxHosts`). Explain plainly that continuing makes new mail for **every** address at the
@@ -161,6 +168,8 @@ step was skipped — say why (Deploy-Infra printed a `WARN:`), and offer `/dts-m
    False → read `body.emailTest`: usually outgoing mail isn't enabled yet (Workers Paid, or Email Sending still being
    activated by Cloudflare for the domain — can take up to an hour). Receiving still works; they can test later by
    sending themselves a message from another account.
+5. Tell them, in two or three lines, what was actually changed (from `body.log`), and that **Settings → Domains →
+   Undo email switch** in the desktop app restores the previous email records at any time.
 
 ## Step 10 — Pick up the matching web app
 
@@ -199,6 +208,8 @@ Summarize in a few lines:
 - **Updates are automatic**: the server checks Chuck's releases every hour and installs them; the web app always
   matches the server; the desktop app updates itself. If an update ever needs infrastructure changes, the apps' admin
   status (or `/dts-mail:manage`) will say so.
+- **Their guide for what comes next**: https://github.com/chuckgiddens/dts-mail/blob/main/GUIDE.md — first sign-in, adding family, bringing old email across (Settings →
+  Import mail), adding another domain and exactly what that changes, and undoing a switch. Give them this link.
 - Family and friends: desktop app → **Settings → People** → invite them (they get mailboxes on the domain).
 - Day-to-day tasks (status, add a domain, rotate the token, see errors, uninstall): `/dts-mail:manage`.
 - The Cloudflare token kept locally during setup can now be removed: run

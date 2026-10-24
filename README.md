@@ -87,6 +87,9 @@ PC, and you choose your own email password yourself, in the app.
 
 ## After setup
 
+**Read the [guide for what comes next](GUIDE.md)**: your first sign-in, adding family, bringing your old email across,
+adding another domain, and exactly what changes in your domain's settings when you do.
+
 - **Signing in:** in the desktop app, the web version or the iPhone app, just enter your email address and password.
   The app finds your server by itself.
 - **Adding family members:** open the desktop app → **Settings** → **People** → invite them. Each person gets an
