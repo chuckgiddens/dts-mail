@@ -1,0 +1,13 @@
+{
+  "name": "DTS Mail",
+  "short_name": "DTS Mail",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080f",
+  "theme_color": "#08080f",
+  "icons": [
+    { "src": "/icon-256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "protocol_handlers": [{ "protocol": "mailto", "url": "/?mailto=%s" }]
+}

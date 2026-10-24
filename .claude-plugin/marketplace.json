@@ -1,0 +1,12 @@
+{
+  "name": "dts-mail",
+  "description": "DTS Mail: run your own private email service on your Azure and Cloudflare accounts, set up and kept current by Claude Code.",
+  "owner": { "name": "Charles Giddens", "email": "chuck@chuckgiddens.com" },
+  "plugins": [
+    {
+      "name": "dts-mail",
+      "source": "./plugins/dts-mail",
+      "description": "Set up and manage your own DTS Mail server (Azure + Cloudflare) from Claude Code."
+    }
+  ]
+}

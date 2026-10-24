@@ -1,0 +1,18 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/*.png", "/*.svg", "/*.webmanifest", "/*.json", "/*.js"]
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' https://dtsmailreleases.blob.core.windows.net; style-src 'self' 'unsafe-inline' https://dtsmailreleases.blob.core.windows.net; img-src 'self' data: blob: https: http:; font-src 'self' data: https://dtsmailreleases.blob.core.windows.net; connect-src 'self' https:; frame-src 'self' about: blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  },
+  "routes": [
+    { "route": "/index.html", "headers": { "Cache-Control": "no-cache" } },
+    { "route": "/loader.js", "headers": { "Cache-Control": "no-cache" } },
+    { "route": "/config.json", "headers": { "Cache-Control": "no-cache" } }
+  ],
+  "mimeTypes": { ".webmanifest": "application/manifest+json" }
+}
