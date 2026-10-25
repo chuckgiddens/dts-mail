@@ -45,19 +45,28 @@ Most households pay about **$5–8 a month** in total. More detail: [costs](plug
 
 ## Set it up
 
-**1. Open Claude Code** and start a new session.
-
-**2. Add DTS Mail to Claude.** Type these two lines into Claude, one at a time, pressing Enter after each:
-
-```
-/plugin marketplace add chuckgiddens/dts-mail
-```
+**1. Add DTS Mail to Claude.** Back in the same **PowerShell** window you used for `az login` (not in Claude), type
+these two lines, one at a time, pressing Enter after each:
 
 ```
-/plugin install dts-mail@dts-mail
+claude plugin marketplace add chuckgiddens/dts-mail
 ```
 
-**3. Start the setup.** Type:
+```
+claude plugin install dts-mail@dts-mail
+```
+
+Each one should end with a line starting with a check mark. This works no matter how you use Claude Code — the
+desktop app, the terminal, or the VS Code extension.
+
+> *Using Claude Code in the terminal?* You can instead type `/plugin marketplace add chuckgiddens/dts-mail` and then
+> `/plugin install dts-mail@dts-mail` inside a Claude session. (That shortcut is terminal-only — in the desktop app,
+> use the PowerShell lines above.)
+
+**2. Open Claude Code and start a new session.** If Claude Code was already open, start a fresh session — it only
+notices what you just installed when a session starts.
+
+**3. Start the setup.** Type into Claude:
 
 ```
 /dts-mail:setup
@@ -97,8 +106,10 @@ adding another domain and exactly what changes in your domain's settings when yo
 - **The iPhone app:** ask Chuck for an invitation to the test version (Apple's TestFlight).
 - **Updates:** nothing to do. Your server installs new versions by itself, the web version always matches it, and
   the desktop app updates itself.
-- **Turn on updates for the setup tools too** (recommended): in Claude, type `/plugin`, choose **Marketplaces** →
-  **dts-mail** → **Enable auto-update**.
+- **Updating the setup tools:** when Chuck says there's something new (or any time you like), type this into
+  PowerShell, then start a new Claude session: `claude plugin update dts-mail@dts-mail`. If you use Claude Code in
+  the terminal, you can instead type `/plugin`, choose **Marketplaces** → **dts-mail** → **Enable auto-update** once
+  and never think about it again.
 
 ## Let Claude email you
 

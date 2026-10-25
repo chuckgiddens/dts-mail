@@ -42,8 +42,8 @@ it and doesn't run any part of it; he publishes the software.
   your Azure resources, it waits and reports `needs-infra`; run `/dts-mail:manage` → re-apply infrastructure.
 - **Web app**: always the build that matches your server — nothing to do.
 - **Desktop app**: updates itself in the background from Chuck's release site.
-- **This Claude Code plugin**: turn on auto-update for the `dts-mail` marketplace (`/plugin` → *Marketplaces*), or run
-  `/plugin marketplace update dts-mail` now and then.
+- **This Claude Code plugin**: run `claude plugin update dts-mail@dts-mail` in a shell now and then (works everywhere),
+  or in a terminal Claude session turn on auto-update for the `dts-mail` marketplace (`/plugin` → *Marketplaces*).
 
 You can turn automatic server updates off (`/dts-mail:manage` → auto-update off); it then only reports that a new
 release is available. Keep it on unless you have a reason: the desktop apps update themselves and expect a current
