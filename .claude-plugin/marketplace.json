@@ -6,7 +6,7 @@
     {
       "name": "dts-mail",
       "source": "./plugins/dts-mail",
-      "description": "Set up and manage your own DTS Mail server (Azure + Cloudflare) from Claude Code."
+      "description": "Set up and manage your own DTS Mail server (Azure + Cloudflare) from Claude Code, and let Claude email you."
     }
   ]
 }

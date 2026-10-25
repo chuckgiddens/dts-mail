@@ -100,6 +100,23 @@ adding another domain and exactly what changes in your domain's settings when yo
 - **Turn on updates for the setup tools too** (recommended): in Claude, type `/plugin`, choose **Marketplaces** →
   **dts-mail** → **Enable auto-update**.
 
+## Let Claude email you
+
+Once you have a DTS Mail address (your own server, or an account on Chuck's), Claude can email you things to keep:
+summaries, notes, reports, files. This works on Windows, Mac and Linux.
+
+1. In the DTS Mail desktop app, open **Settings** → **API tokens** and create a token named "Claude" with the scope
+   **send**. This kind of token can only send mail. It can't read your email or change anything.
+2. In Claude Code, type `/dts-mail:email-me setup`. Claude asks for your email address, then asks you to paste the
+   token into a hidden prompt (a small window on Windows, your terminal on Mac and Linux). It never goes into the
+   chat. A test email arrives to show it works.
+3. From then on, just ask: *"email me a summary of what we did"*, *"send me that report"*.
+
+Claude only emails **you**. To let it email someone else, ask it to allow that address first. To stop it, revoke the
+token in **Settings** → **API tokens**.
+
+---
+
 ## Need help later?
 
 Type `/dts-mail:manage` in Claude Code. It can show whether everything is working, install an update right now, add
