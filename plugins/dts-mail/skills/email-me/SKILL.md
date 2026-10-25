@@ -24,12 +24,14 @@ Never ask for the token in the chat, and never read the token file. If the user 
 tell them to revoke it in the app and create a new one, and don't use it.
 
 1. They create the token: DTS Mail desktop app → **Settings → API tokens** → name it "Claude", scope **send**, and
-   their own address (or its domain) → copy the `dts_…` secret (shown once).
+   their domain → copy the `dts_…` secret (shown once). The token covers every address they have on that domain.
 2. **Windows:** ask for their email address (not a secret), then run `-Action setup -Email <address>`. A small masked
-   window opens for the token.
+   window opens for the token. Without `-From`, mail goes out as their account's first address on the domain; if
+   they want Claude to send as a different address of theirs (say `claude@their-domain`), they add it as an address
+   in the app first, then setup takes `-From <address>`.
    **Mac / Linux:** the token prompt needs their own terminal. Give them the exact command to run there (with this
-   skill's real path filled in): `python3 "<path>/scripts/email_me.py" setup`. It asks for the address and the token
-   (hidden). Wait for them to say it's done.
+   skill's real path filled in): `python3 "<path>/scripts/email_me.py" setup` (plus `--from <address>` for a
+   different sender). It asks for the address and the token (hidden). Wait for them to say it's done.
 3. Setup finds their server from the address (DNS `_dtsmail` record; Chuck's own server otherwise; `--api` / `-Api`
    overrides) and sends a test email. Ask them to confirm it arrived.
 
@@ -58,8 +60,10 @@ tool's output asks for it. Then send with `--to <address>` (Windows `-To <addres
 
 ## Status and problems
 
-- `status` shows the address, server and allowed recipients (never the token).
+- `status` shows the address, sender, server and allowed recipients (never the token).
+- The user asks to change the sender address: it must be one of their addresses on the token's domain (they add it
+  in the app first), then rerun setup with `-From` / `--from` — no new token needed.
 - Token refused (401): it was revoked or expired → they create a new one → **Setup** again.
-- `403 … can only send as …`: the token is for a different address or domain than the one set up → new token
-  for the right one.
+- `403 … can only send as …`: the sender isn't on the token's domain (or an old single-address token) → rerun setup
+  with the right `-From`, or a new token for the right domain.
 - Can't reach the server: check the `api` in `status`; rerun setup with `--api https://<app>.azurewebsites.net/api`.

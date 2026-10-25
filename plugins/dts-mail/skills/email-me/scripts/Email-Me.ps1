@@ -1,16 +1,19 @@
 # Emails the user from Claude Code through their DTS Mail server, with a send-only API token (Windows; Mac and
 # Linux use email_me.py). The token is typed into a masked dialog and kept with DPAPI, never shown in the chat.
 #
-#   Email-Me.ps1 -Action setup -Email you@example.com [-Api https://<app>.azurewebsites.net/api]
+#   Email-Me.ps1 -Action setup -Email you@example.com [-From claude@example.com] [-Api https://<app>.azurewebsites.net/api]
 #   Email-Me.ps1 -Action status
 #   Email-Me.ps1 -Action allow -Email someone@example.com
-#   Email-Me.ps1 -Action send -Subject "..." -Html body.html [-Text body.txt] [-To a@x.com,b@y.com] [-Attach f1,f2]
+#   Email-Me.ps1 -Action send -Subject "..." -Html body.html [-Text body.txt] [-To a@x.com,b@y.com] [-Attach f1,f2] [-From claude@example.com]
 #
 # Config: %LOCALAPPDATA%\DtsMail\email-me.json and email-me.secret. Mail only goes to the "allowed" addresses; the
-# first one is the default.
+# first one is the default. The token decides the sender: without "from" the server uses the account's first address
+# on the token's domain, so -From only matters when the user wants a different one of their addresses (it is saved
+# at setup and can be overridden per send).
 param(
     [Parameter(Mandatory = $true)][ValidateSet('setup', 'status', 'allow', 'send')][string]$Action,
     [string]$Email,
+    [string]$From,
     [string]$Api,
     [string]$Subject,
     [string]$Html,
@@ -84,6 +87,10 @@ switch ($Action) {
     'setup' {
         if (-not $Email -or $Email -notlike '*@*') { Fail 'pass -Email <your address>.' }
         $Email = $Email.Trim().ToLowerInvariant()
+        if ($From) {
+            $From = $From.Trim().ToLowerInvariant()
+            if ($From -notlike '*@*') { Fail '-From must be an email address on your domain.' }
+        }
         if (-not $Api) { $Api = Find-Server $Email }
         if (-not $Api) { $Api = $defaultApi }
         Write-Output "Server: $Api"
@@ -97,20 +104,22 @@ switch ($Action) {
             $previous = Get-Content $configFile -Raw | ConvertFrom-Json
             $allowed += @($previous.allowed | Where-Object { $_ -and $_ -ne $Email })
         }
-        Save-Config ([ordered]@{ email = $Email; api = $Api; allowed = $allowed })
+        Save-Config ([ordered]@{ email = $Email; from = $From; api = $Api; allowed = $allowed })
 
-        $r = Send-DtsMail $Api $token @{
+        $test = @{
             to = @($Email); subject = 'Claude can now email you'
             text = "This is a test from the DTS Mail email-me skill. Ask Claude to `"email me`" anything.`n"
             html = '<p>This is a test from the DTS Mail <b>email-me</b> skill.</p><p>Ask Claude to &ldquo;email me&rdquo; anything.</p>'
         }
+        if ($From) { $test.from = $From }
+        $r = Send-DtsMail $Api $token $test
         if ($r.Status -ge 300 -or $r.Status -eq 0) { Fail "the test email was not sent ($($r.Status): $($r.Body)). Check the token, then run setup again." }
         Write-Output "OK: set up. A test email is on its way to $Email."
     }
     'status' {
         $c = Get-Config
         Write-Output 'OK: set up.'
-        [ordered]@{ email = $c.Config.email; api = $c.Config.api; allowed = @($c.Config.allowed); token = 'saved' } |
+        [ordered]@{ email = $c.Config.email; from = $c.Config.from; api = $c.Config.api; allowed = @($c.Config.allowed); token = 'saved' } |
             ConvertTo-Json | Write-Output
     }
     'allow' {
@@ -119,7 +128,7 @@ switch ($Action) {
         $address = $Email.Trim().ToLowerInvariant()
         $allowed = @($c.Config.allowed)
         if ($allowed -notcontains $address) { $allowed += $address }
-        Save-Config ([ordered]@{ email = $c.Config.email; api = $c.Config.api; allowed = $allowed })
+        Save-Config ([ordered]@{ email = $c.Config.email; from = $c.Config.from; api = $c.Config.api; allowed = $allowed })
         Write-Output "OK: $address can now receive email from Claude. Allowed: $($allowed -join ', ')"
     }
     'send' {
@@ -135,6 +144,8 @@ switch ($Action) {
         $markup = [IO.File]::ReadAllText((Resolve-Path $Html))
         $plain = if ($Text) { [IO.File]::ReadAllText((Resolve-Path $Text)) } else { ConvertTo-PlainText $markup }
         $body = @{ to = [object[]]$recipients; subject = $Subject; text = $plain; html = $markup }
+        $sender = if ($From) { $From.Trim().ToLowerInvariant() } else { $c.Config.from }
+        if ($sender) { $body.from = $sender }
 
         if ($Attach.Count -gt 0) {
             $files = @()

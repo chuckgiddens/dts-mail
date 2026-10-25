@@ -5,10 +5,12 @@ Windows uses Email-Me.ps1). Standard library only.
   email_me.py setup                      # run by the user in their own terminal: asks for address and token
   email_me.py status                     # what's configured (never prints the token)
   email_me.py allow <address>            # add an allowed recipient
-  email_me.py send --subject S --html body.html [--text body.txt] [--to addr ...] [--attach file ...]
+  email_me.py send --subject S --html body.html [--text body.txt] [--to addr ...] [--attach file ...] [--from addr]
 
 Config lives in ~/.config/dts-mail/ (email-me.json, and email-me.token with mode 600). Mail only goes to the
-addresses in "allowed"; the first one is the default. Prints OK:/FAIL: lines like the setup scripts.
+addresses in "allowed"; the first one is the default. The token decides the sender: without "from" the server uses
+the account's first address on the token's domain, so --from only matters when the user wants a different one of
+their addresses (saved at setup, overridable per send). Prints OK:/FAIL: lines like the setup scripts.
 """
 import argparse
 import base64
@@ -145,6 +147,9 @@ def cmd_setup(args):
     email = (args.email or input("Your email address: ")).strip().lower()
     if "@" not in email:
         fail("that isn't an email address.")
+    sender = (args.sender or "").strip().lower()
+    if sender and "@" not in sender:
+        fail("--from must be an email address on your domain.")
     api = args.api or discover(email) or DEFAULT_API
     print(f"Server: {api}")
     token = getpass.getpass("Paste the API token (dts_..., hidden): ").strip()
@@ -160,15 +165,18 @@ def cmd_setup(args):
         with open(CONFIG, encoding="utf-8") as f:
             previous = json.load(f)
     allowed = [email] + [a for a in previous.get("allowed", []) if a != email]
-    save_config({"email": email, "api": api, "allowed": allowed})
+    save_config({"email": email, "from": sender, "api": api, "allowed": allowed})
 
-    status, result = post_send(api, token, {
+    test = {
         "to": [email],
         "subject": "Claude can now email you",
         "text": "This is a test from the DTS Mail email-me skill. Ask Claude to \"email me\" anything.\n",
         "html": "<p>This is a test from the DTS Mail <b>email-me</b> skill.</p>"
                 "<p>Ask Claude to &ldquo;email me&rdquo; anything.</p>",
-    })
+    }
+    if sender:
+        test["from"] = sender
+    status, result = post_send(api, token, test)
     if status >= 300:
         fail(f"the test email was not sent ({status}: {result}). Check the token, then run setup again.")
     print(f"OK: set up. A test email is on its way to {email}.")
@@ -177,8 +185,8 @@ def cmd_setup(args):
 def cmd_status(_):
     cfg, token = load_config()
     print("OK: set up.")
-    print(json.dumps({"email": cfg.get("email"), "api": cfg.get("api"), "allowed": cfg.get("allowed", []),
-                      "token": "saved" if token else None}, indent=2))
+    print(json.dumps({"email": cfg.get("email"), "from": cfg.get("from"), "api": cfg.get("api"),
+                      "allowed": cfg.get("allowed", []), "token": "saved" if token else None}, indent=2))
 
 
 def cmd_allow(args):
@@ -222,6 +230,9 @@ def cmd_send(args):
             })
 
     body = {"to": to, "subject": args.subject, "text": text, "html": markup}
+    sender = (args.sender or cfg.get("from") or "").strip().lower()
+    if sender:
+        body["from"] = sender
     if attachments:
         body["attachments"] = attachments
     status, result = post_send(cfg["api"], token, body)
@@ -237,6 +248,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("setup")
     p.add_argument("--email")
+    p.add_argument("--from", dest="sender", help="address Claude sends as (default: the account's first address)")
     p.add_argument("--api", help="server API URL, when the domain has no _dtsmail record")
     p.set_defaults(func=cmd_setup)
     sub.add_parser("status").set_defaults(func=cmd_status)
@@ -249,6 +261,7 @@ def main():
     p.add_argument("--text", help="file with the plain-text body (default: made from the HTML)")
     p.add_argument("--to", action="append", help="recipient (default: the first allowed address)")
     p.add_argument("--attach", action="append", help="file to attach (repeatable)")
+    p.add_argument("--from", dest="sender", help="address Claude sends as, overriding the one saved at setup")
     p.set_defaults(func=cmd_send)
     args = parser.parse_args()
     args.func(args)
